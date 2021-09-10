@@ -1,0 +1,22 @@
+version: "3"
+services:
+  downloads_crm:
+    build: .
+    image: downloads_crm
+    volumes:
+      - .:/app/downloads_crm
+    ports:
+      - 4000:4000
+    environment:
+      - MIX_ENV=dev
+    depends_on:
+      - postgres
+    command: mix run --no-halt
+
+  postgres:
+    image: postgres:13.2
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_USER=postgres
