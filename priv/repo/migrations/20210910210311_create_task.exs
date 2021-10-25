@@ -11,6 +11,7 @@ defmodule DownloadsCrm.Repo.Migrations.CreateTask do
       add(:price, :float)
       add(:urls, {:array, :string}, null: false)
       add(:status, :task_status)
+      add(:estimate_date, :utc_datetime)
       add(:progress, :integer)
     end
 

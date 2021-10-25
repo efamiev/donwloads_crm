@@ -9,5 +9,7 @@ defmodule DownloadsCrm.Storage.Pg.Schema.Task do
     field(:urls, {:array, :string})
     field(:status, :string)
     field(:progress, :integer)
+    field(:estimate_date, :utc_datetime)
+    belongs_to(:project, DownloadsCrm.Storage.Pg.Schema.Project)
   end
 end

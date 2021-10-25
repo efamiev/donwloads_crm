@@ -3,6 +3,7 @@ defmodule DownloadsCrm.SocketHandler do
 
   def init(request, _state) do
     state = %{registry_key: request.path}
+    IO.inspect(request.path, label: "REQUEST PATH")
 
     {:cowboy_websocket, request, state}
   end

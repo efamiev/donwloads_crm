@@ -6,5 +6,6 @@ defmodule DownloadsCrm.Storage.Pg.Schema.Project do
     field(:name, :string)
     field(:description, :string)
     field(:price, :float)
+    has_many(:tasks, DownloadsCrm.Storage.Pg.Schema.Task)
   end
 end
