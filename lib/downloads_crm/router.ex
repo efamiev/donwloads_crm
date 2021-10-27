@@ -1,12 +1,11 @@
 defmodule DownloadsCrm.Router do
   use Plug.Router
+  use Plug.ErrorHandler
 
   alias DownloadsCrm.Storage.Pg.Projects
   alias DownloadsCrm.Utils
 
-  plug(Plug.Logger)
-
-  plug(:match)
+  require Logger
 
   plug(Plug.Parsers,
     parsers: [:json],
@@ -14,6 +13,8 @@ defmodule DownloadsCrm.Router do
     json_decoder: Jason
   )
 
+  plug(DownloadsCrm.Plug.Logger)
+  plug(:match)
   plug(:dispatch)
 
   # TODO: add estimate date, status, progress, tasks_count fields
@@ -31,11 +32,6 @@ defmodule DownloadsCrm.Router do
 
         {:error, %Ecto.Changeset{errors: errors}} ->
           {400, Utils.endpoint_error(400, Utils.format_changeset_errors(errors))}
-
-        error ->
-          IO.inspect(error, label: "Unexpected error")
-
-          {500, Utils.endpoint_error(500, "Unexpected error")}
       end
 
     send_json(conn, status, body)
@@ -56,6 +52,31 @@ defmodule DownloadsCrm.Router do
   end
 
   match(_, do: send_resp(conn, 404, "Oops!"))
+
+  defp handle_errors(conn, %{kind: _kind, reason: %{__struct__: e} = error, stack: _stack})
+       when e in [
+              Plug.Parsers.RequestTooLargeError,
+              Plug.Parsers.UnsupportedMediaTypeError,
+              Plug.Parsers.BadEncodingError,
+              Plug.Parsers.ParseError
+            ] do
+    Logger.warn(inspect(error))
+
+    resp_data = Utils.endpoint_error(400, "invalid request format")
+    conn = Plug.Conn.put_status(conn, 400) |> put_private(:_result, resp_data)
+
+    send_json(conn, 400, resp_data)
+  end
+
+  defp handle_errors(conn, %{kind: kind, reason: reason, stack: stack}) do
+    Logger.warn("error=#{kind} reason=#{inspect(reason)}")
+    Logger.debug(inspect(stack))
+
+    resp_data = Utils.endpoint_error(500, "internal server error")
+    conn = Plug.Conn.put_status(conn, 500) |> put_private(:_result, resp_data)
+
+    send_json(conn, 500, resp_data)
+  end
 
   defp send_json(conn, status, body) do
     conn
