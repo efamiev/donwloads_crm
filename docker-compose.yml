@@ -11,7 +11,7 @@ services:
       - MIX_ENV=dev
     depends_on:
       - postgres
-    command: mix run --no-halt
+    command: sleep infinity
 
   postgres:
     image: postgres:13.2
