@@ -1,8 +1,10 @@
 defmodule DownloadsCrm.Router do
   use Plug.Router
 
-  alias DownloadsCrm.Repo
-  alias DownloadsCrm.Storage.Pg.Schema.Project
+  alias DownloadsCrm.Storage.Pg.Projects
+  alias DownloadsCrm.Utils
+
+  plug(Plug.Logger)
 
   plug(:match)
 
@@ -14,33 +16,50 @@ defmodule DownloadsCrm.Router do
 
   plug(:dispatch)
 
+  # TODO: add estimate date, status, progress, tasks_count fields
   get "/projects" do
-    send_resp(conn, 200, "ok")
+    projects = Projects.list_projects()
+
+    send_json(conn, 200, Utils.endpoint_success(%{projects: projects}))
   end
 
   post "/projects" do
-    with %{valid?: true} = changeset <- Project.changeset(%Project{}, conn.params),
-         {:ok, project} <- Repo.insert(changeset) do
-      render_json(conn, project)
-    else
-      %Ecto.Changeset{errors: errors} = res ->
-        send_resp(conn, 400, format_errors(errors))
+    {status, body} =
+      case Projects.create_project(conn.params) do
+        {:ok, project} ->
+          {200, Utils.endpoint_success(%{project: project})}
 
-      error ->
-        IO.inspect(error, label: "Unexpected error")
-        send_resp(conn, 500, "Unexpected error")
-    end
+        {:error, %Ecto.Changeset{errors: errors}} ->
+          {400, Utils.endpoint_error(400, Utils.format_changeset_errors(errors))}
+
+        error ->
+          IO.inspect(error, label: "Unexpected error")
+
+          {500, Utils.endpoint_error(500, "Unexpected error")}
+      end
+
+    send_json(conn, status, body)
+  end
+
+  get "/tasks" do
+    {status, body} = {200, Utils.endpoint_success(%{tasks: []})}
+
+    send_json(conn, status, body)
+  end
+
+  post "/tasks/batch_create" do
+    send_resp(conn, 200, "ok")
+  end
+
+  post "/tasks/batch_update" do
+    send_resp(conn, 200, "ok")
   end
 
   match(_, do: send_resp(conn, 404, "Oops!"))
 
-  defp format_errors(errors) do
-    errors
-    |> Enum.map(fn {attr_name, {msg, _opts}} -> "#{attr_name}: #{msg}" end)
-  end
-
-  defp render_json(%{status: status} = conn, data) do
-    body = Jason.encode!(data)
-    send_resp(conn, status || 200, body)
+  defp send_json(conn, status, body) do
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(status, body)
   end
 end
