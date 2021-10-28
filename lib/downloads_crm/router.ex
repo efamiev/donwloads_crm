@@ -14,6 +14,7 @@ defmodule DownloadsCrm.Router do
   )
 
   plug(DownloadsCrm.Plug.Logger)
+
   plug(:match)
   plug(:dispatch)
 
@@ -21,12 +22,12 @@ defmodule DownloadsCrm.Router do
   get "/projects" do
     projects = Projects.list_projects()
 
-    send_json(conn, 200, Utils.endpoint_success(%{projects: projects}))
+    send_json_resp(conn, 200, Utils.endpoint_success(%{projects: projects}))
   end
 
   post "/projects" do
     {status, body} =
-      case Projects.create_project(conn.params) do
+      case Projects.create_project(conn.body_params) do
         {:ok, project} ->
           {200, Utils.endpoint_success(%{project: project})}
 
@@ -34,17 +35,27 @@ defmodule DownloadsCrm.Router do
           {400, Utils.endpoint_error(400, Utils.format_changeset_errors(errors))}
       end
 
-    send_json(conn, status, body)
+    send_json_resp(conn, status, body)
   end
 
   get "/tasks" do
     {status, body} = {200, Utils.endpoint_success(%{tasks: []})}
 
-    send_json(conn, status, body)
+    send_json_resp(conn, status, body)
   end
 
   post "/tasks/batch_create" do
-    send_resp(conn, 200, "ok")
+    case conn.body_params do
+      %{"tasks" => _tasks} ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_json_resp(200, Utils.endpoint_success([]))
+
+      _ ->
+        conn
+        |> put_resp_content_type("application/json")
+        |> send_json_resp(400, Utils.endpoint_error(400, "Missing tasks"))
+    end
   end
 
   post "/tasks/batch_update" do
@@ -65,20 +76,20 @@ defmodule DownloadsCrm.Router do
     resp_data = Utils.endpoint_error(400, "invalid request format")
     conn = Plug.Conn.put_status(conn, 400) |> put_private(:_result, resp_data)
 
-    send_json(conn, 400, resp_data)
+    send_json_resp(conn, 400, resp_data)
   end
 
   defp handle_errors(conn, %{kind: kind, reason: reason, stack: stack}) do
     Logger.warn("error=#{kind} reason=#{inspect(reason)}")
     Logger.debug(inspect(stack))
 
-    resp_data = Utils.endpoint_error(500, "internal server error")
+    resp_data = Utils.endpoint_error(500, "Internal server error")
     conn = Plug.Conn.put_status(conn, 500) |> put_private(:_result, resp_data)
 
-    send_json(conn, 500, resp_data)
+    send_json_resp(conn, 500, resp_data)
   end
 
-  defp send_json(conn, status, body) do
+  defp send_json_resp(conn, status, body) do
     conn
     |> put_resp_content_type("application/json")
     |> send_resp(status, body)
