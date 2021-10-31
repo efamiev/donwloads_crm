@@ -7,3 +7,9 @@ config :downloads_crm, DownloadsCrm.Repo,
   username: "postgres",
   password: "postgres",
   hostname: "postgres"
+
+try do
+  import_config "#{Mix.env()}.exs"
+rescue
+  e in Code.LoadError -> e
+end

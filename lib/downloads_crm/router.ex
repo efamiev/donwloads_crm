@@ -3,6 +3,7 @@ defmodule DownloadsCrm.Router do
   use Plug.ErrorHandler
 
   alias DownloadsCrm.Storage.Pg.Projects
+  alias DownloadsCrm.Storage.Pg.Tasks
   alias DownloadsCrm.Utils
 
   require Logger
@@ -46,10 +47,15 @@ defmodule DownloadsCrm.Router do
 
   post "/tasks/batch_create" do
     case conn.body_params do
-      %{"tasks" => _tasks} ->
+      %{"tasks" => tasks} ->
+        status =
+          Enum.each(tasks, fn task ->
+            Tasks.create_task(task)
+          end)
+
         conn
         |> put_resp_content_type("application/json")
-        |> send_json_resp(200, Utils.endpoint_success([]))
+        |> send_json_resp(200, Utils.endpoint_success(status))
 
       _ ->
         conn
