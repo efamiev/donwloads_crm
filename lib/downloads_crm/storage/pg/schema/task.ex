@@ -4,7 +4,6 @@ defmodule DownloadsCrm.Storage.Pg.Schema.Task do
   import Ecto.Changeset
 
   schema "tasks" do
-    field(:uuid, Ecto.UUID, autogenerate: true)
     field(:name, :string)
     field(:description, :string)
     field(:price, :float)

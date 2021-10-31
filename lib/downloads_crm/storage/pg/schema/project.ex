@@ -5,7 +5,6 @@ defmodule DownloadsCrm.Storage.Pg.Schema.Project do
 
   @derive {Jason.Encoder, except: [:__meta__, :__struct__, :tasks]}
   schema "projects" do
-    field(:uuid, Ecto.UUID, autogenerate: true)
     field(:name, :string)
     field(:description, :string)
     field(:price, :float)
