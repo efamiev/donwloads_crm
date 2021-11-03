@@ -19,7 +19,6 @@ defmodule DownloadsCrm.Router do
   plug(:match)
   plug(:dispatch)
 
-  # TODO: add estimate date, status, progress, tasks_count fields
   get "/projects" do
     projects = Projects.list_projects()
 

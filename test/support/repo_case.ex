@@ -8,6 +8,7 @@ defmodule DownloadsCrm.RepoCase do
       import Ecto
       import Ecto.Query
       import DownloadsCrm.RepoCase
+      import DownloadsCrm.Factory
     end
   end
 

@@ -5,7 +5,19 @@ defmodule DownloadsCrm.Storage.Pg.Projects do
   alias DownloadsCrm.Storage.Pg.Schema.Project
 
   def list_projects do
-    query = from(Project, preload: [:tasks])
+    query =
+      from(p in Project,
+        join: t in assoc(p, :tasks),
+        select: %{
+          "id" => p.id,
+          "price" => p.price,
+          "tasks_count" => count(),
+          "estimate_date" => max(t.estimate_date),
+          "progress" => min(t.progress),
+          "status" => min(t.status)
+        },
+        group_by: [p.id]
+      )
 
     Repo.all(query)
   end

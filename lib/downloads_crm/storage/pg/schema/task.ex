@@ -15,7 +15,6 @@ defmodule DownloadsCrm.Storage.Pg.Schema.Task do
   end
 
   @valid_statuses ["initialized", "processing", "failed", "finished"]
-  # @valid_statuses ~w('initialized', 'processing', 'failed', 'finished')s
 
   def changeset(task, attrs \\ %{}) do
     task
@@ -32,4 +31,6 @@ defmodule DownloadsCrm.Storage.Pg.Schema.Task do
     |> validate_required([:name])
     |> validate_inclusion(:status, @valid_statuses)
   end
+
+  def valid_statuses, do: @valid_statuses
 end
