@@ -39,7 +39,8 @@ defmodule DownloadsCrm.Router do
   end
 
   get "/tasks" do
-    {status, body} = {200, Utils.endpoint_success(%{tasks: []})}
+    tasks = Tasks.list_tasks()
+    {status, body} = {200, Utils.endpoint_success(%{tasks: tasks})}
 
     send_json_resp(conn, status, body)
   end
@@ -47,19 +48,19 @@ defmodule DownloadsCrm.Router do
   post "/tasks/batch_create" do
     case conn.body_params do
       %{"tasks" => tasks} ->
-        status =
-          Enum.each(tasks, fn task ->
-            Tasks.create_task(task)
-          end)
+        {status, body} =
+          case Tasks.batch_create_tasks(tasks) do
+            {:ok, created_tasks} ->
+              {200, Utils.endpoint_success(created_tasks)}
 
-        conn
-        |> put_resp_content_type("application/json")
-        |> send_json_resp(200, Utils.endpoint_success(status))
+            {:error, reason} ->
+              {400, Utils.endpoint_error(400, reason)}
+          end
+
+        send_json_resp(conn, status, body)
 
       _ ->
-        conn
-        |> put_resp_content_type("application/json")
-        |> send_json_resp(400, Utils.endpoint_error(400, "Missing tasks"))
+        send_json_resp(conn, 400, Utils.endpoint_error(400, "Missing tasks"))
     end
   end
 

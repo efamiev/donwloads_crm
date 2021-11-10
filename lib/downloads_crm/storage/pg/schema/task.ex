@@ -3,6 +3,7 @@ defmodule DownloadsCrm.Storage.Pg.Schema.Task do
 
   import Ecto.Changeset
 
+  @derive {Jason.Encoder, except: [:__meta__, :__struct__]}
   schema "tasks" do
     field(:name, :string)
     field(:description, :string)
@@ -15,7 +16,6 @@ defmodule DownloadsCrm.Storage.Pg.Schema.Task do
   end
 
   @valid_statuses ["initialized", "processing", "failed", "finished"]
-
   def changeset(task, attrs \\ %{}) do
     task
     |> cast(attrs, [
