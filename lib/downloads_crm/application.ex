@@ -7,8 +7,7 @@ defmodule DownloadsCrm.Application do
     port = 4000
 
     children = [
-      {Plug.Cowboy,
-       scheme: :http, plug: DownloadsCrm.Router, options: [port: port, dispatch: dispatch()]},
+      {Plug.Cowboy, scheme: :http, plug: DownloadsCrm.Router, options: [port: port, dispatch: dispatch()]},
       {Registry, keys: :duplicate, name: Registry.DownloadsCrm},
       {DownloadsCrm.Repo, []}
     ]

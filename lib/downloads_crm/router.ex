@@ -53,6 +53,9 @@ defmodule DownloadsCrm.Router do
             {:ok, created_tasks} ->
               {200, Utils.endpoint_success(created_tasks)}
 
+            {:error, %Ecto.InvalidChangesetError{changeset: %{errors: errors}}} ->
+              {400, Utils.endpoint_error(400, Utils.format_changeset_errors(errors))}
+
             {:error, reason} ->
               {400, Utils.endpoint_error(400, reason)}
           end
