@@ -16,7 +16,16 @@ RUN mix local.hex --force && mix local.rebar --force
 # docker-compose run <compose_service_name> mix ecto.create --rm
 
 # start with active shell
-# docker-compose run --service-ports <compose_service_name> iex -S mix run --no-halt
+# создать новый контейнер для каждого запуска и удалить после завершения
+# docker-compose run --rm  --service-ports <compose_service_name> iex -S mix run --no-halt
 # or
+# перейти в запущенный контейнер и выполнить команду запуска сервиса
 # docker-compose up -d
 # docker-compose exec <compose_service_name> iex -S mix run --no-halt
+
+# run tests
+# создать новый контейнер для запуска тестов и удалить после завершения
+# docker-compose run --rm -e MIX_ENV=test <compose_service_name> mix test
+# or
+# перейти в запущенный контейнер и запустить тесты
+# docker-compose exec -e MIX_ENV=test <compose_service_name> mix test
