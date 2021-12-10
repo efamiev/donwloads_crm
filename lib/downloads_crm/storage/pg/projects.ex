@@ -5,6 +5,7 @@ defmodule DownloadsCrm.Storage.Pg.Projects do
   alias DownloadsCrm.Storage.Pg.Schema.Project
 
   def list_projects do
+    # TODO: сейчас не возвращает проекты без задач, нужно исправить
     query =
       from(p in Project,
         join: t in assoc(p, :tasks),
