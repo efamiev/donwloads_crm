@@ -20,6 +20,8 @@ RUN mix local.hex --force && mix local.rebar --force
 # docker-compose run --rm  --service-ports <compose_service_name> iex -S mix run --no-halt
 # or
 # перейти в запущенный контейнер и выполнить команду запуска сервиса
+# такой подход используется чтобы все настройки, в том числе локальные файлы .elixir_ls хранились в контейнере
+# затем можно подключиться в VSCode к контейнеру и работать полностью внутри контейнера
 # docker-compose up -d
 # docker-compose exec <compose_service_name> iex -S mix run --no-halt
 
