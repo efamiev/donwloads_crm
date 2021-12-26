@@ -3,7 +3,6 @@ defmodule DownloadsCrm.RouterTest do
   use Plug.Test
 
   alias DownloadsCrm.Router
-  alias DownloadsCrm.Storage.Pg.Schema.Task, as: ProjectTask
 
   @opts Router.init([])
 
