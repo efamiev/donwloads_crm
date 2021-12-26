@@ -51,6 +51,8 @@ defmodule DownloadsCrm.Router do
         {status, body} =
           case Tasks.batch_create_tasks(tasks) do
             {:ok, created_tasks} ->
+              # Отправляем таски в воркер, где они будут обрабатываться
+              # Processor.process(created_tasks)
               {200, Utils.endpoint_success(created_tasks)}
 
             {:error, %Ecto.InvalidChangesetError{changeset: %{errors: errors}}} ->
@@ -72,6 +74,12 @@ defmodule DownloadsCrm.Router do
   end
 
   match(_, do: send_resp(conn, 404, "Oops!"))
+
+  defp send_json_resp(conn, status, body) do
+    conn
+    |> put_resp_content_type("application/json")
+    |> send_resp(status, body)
+  end
 
   defp handle_errors(conn, %{kind: _kind, reason: %{__struct__: e} = error, stack: _stack})
        when e in [
@@ -96,11 +104,5 @@ defmodule DownloadsCrm.Router do
     conn = Plug.Conn.put_status(conn, 500) |> put_private(:_result, resp_data)
 
     send_json_resp(conn, 500, resp_data)
-  end
-
-  defp send_json_resp(conn, status, body) do
-    conn
-    |> put_resp_content_type("application/json")
-    |> send_resp(status, body)
   end
 end

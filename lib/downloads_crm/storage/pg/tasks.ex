@@ -20,6 +20,12 @@ defmodule DownloadsCrm.Storage.Pg.Tasks do
     |> Repo.insert!()
   end
 
+  def update_task(id, attrs) do
+    Repo.get!(Task, id)
+    |> Task.changeset(attrs)
+    |> Repo.update()
+  end
+
   def batch_create_tasks(tasks) do
     try do
       Repo.transaction(fn ->
